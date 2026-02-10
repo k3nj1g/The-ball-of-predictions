@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Мистический шар</title>
+    <meta
+      name="description"
+      content="Мистический энергетический шар, который предскажет судьбу в стиле тёмной иронии."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app" aria-live="polite">
+      <section class="orb-section" aria-label="Энергетический шар">
+        <canvas id="orb-canvas" width="800" height="800"></canvas>
+      </section>
+
+      <section class="controls" aria-label="Панель предсказаний">
+        <label class="sr-only" for="name-input">Введи своё имя</label>
+        <input
+          id="name-input"
+          class="name-input"
+          type="text"
+          inputmode="text"
+          maxlength="32"
+          autocomplete="name"
+          placeholder="Введи своё имя…"
+          aria-label="Введи своё имя"
+        />
+
+        <button id="predict-btn" class="action-btn" aria-label="Предсказать судьбу">
+          Предсказать судьбу
+        </button>
+      </section>
+
+      <p id="error-text" class="error-text" role="alert" hidden></p>
+
+      <article id="prediction-card" class="prediction-card" hidden>
+        <h1 class="prediction-title">Шёпот шара</h1>
+        <p id="prediction-text" class="prediction-text"></p>
+      </article>
+
+      <section id="share-controls" class="share-controls" hidden>
+        <button id="share-btn" class="secondary-btn" aria-label="Поделиться предсказанием">Поделиться</button>
+        <button id="copy-btn" class="secondary-btn" aria-label="Скопировать предсказание">Скопировать</button>
+        <div class="social-links" aria-label="Быстрые ссылки для шаринга">
+          <a id="tg-link" target="_blank" rel="noopener noreferrer">Telegram</a>
+          <a id="vk-link" target="_blank" rel="noopener noreferrer">VK</a>
+          <a id="x-link" target="_blank" rel="noopener noreferrer">X/Twitter</a>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
