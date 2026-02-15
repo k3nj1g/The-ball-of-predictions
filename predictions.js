@@ -248,6 +248,11 @@ function pick(arr, randomizer) {
   return arr[Math.floor(randomizer() * arr.length)];
 }
 
+function capitalizeSentence(text) {
+  if (!text) return text;
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 function createSeededRandom(seed) {
   let state = seed % 2147483647;
   if (state <= 0) state += 2147483646;
@@ -266,7 +271,7 @@ export function generatePrediction(name, useSeed = true) {
   const tone = pick(tones, randomizer);
 
   const omen = pick(tone.omens, randomizer);
-  const warning = pick(tone.warnings, randomizer);
+  const warning = capitalizeSentence(pick(tone.warnings, randomizer));
   const tagline = pick(tone.taglines, randomizer);
 
   const templates = [

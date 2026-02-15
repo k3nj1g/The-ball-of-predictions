@@ -7,6 +7,10 @@
   --button-text: #101015;
   --button-hover: #ffffff;
   --accent: #8e5bff;
+  --mist: rgba(126, 88, 214, 0.22);
+  --mist-strong: rgba(94, 56, 168, 0.38);
+  --ring: rgba(197, 170, 255, 0.35);
+  --ring-soft: rgba(197, 170, 255, 0.12);
 }
 
 * {
@@ -19,6 +23,37 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: "Cormorant Garamond", "Times New Roman", serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::before {
+  background:
+    radial-gradient(circle at 20% 10%, var(--mist-strong), transparent 55%),
+    radial-gradient(circle at 80% 30%, var(--mist), transparent 60%),
+    radial-gradient(circle at 30% 80%, rgba(58, 30, 110, 0.28), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(24, 8, 58, 0.45), transparent 50%);
+  filter: blur(8px);
+  animation: drift-mist 18s ease-in-out infinite;
+}
+
+body::after {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(rgba(0, 0, 0, 0.2) 1px, transparent 1px);
+  background-size: 3px 3px, 4px 4px;
+  mix-blend-mode: soft-light;
+  opacity: 0.35;
+  animation: shimmer-grain 9s linear infinite;
 }
 
 .app {
@@ -29,6 +64,8 @@ body {
   align-items: center;
   gap: 1rem;
   padding: 1rem 1rem 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 .orb-section {
@@ -36,12 +73,74 @@ body {
   aspect-ratio: 1;
   display: grid;
   place-items: center;
+  position: relative;
+}
+
+.orb-section::before,
+.orb-section::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  border: 1px solid var(--ring-soft);
+  box-shadow: 0 0 25px rgba(148, 110, 255, 0.25);
+  pointer-events: none;
+}
+
+.orb-section::before {
+  transform: rotate(18deg);
+  animation: orbit-slow 12s linear infinite;
+}
+
+.orb-section::after {
+  inset: 16%;
+  border-color: var(--ring);
+  transform: rotate(-12deg);
+  opacity: 0.7;
+  animation: orbit-slower 18s linear infinite;
 }
 
 #orb-canvas {
   width: 100%;
   height: 100%;
   filter: drop-shadow(0 0 24px rgba(125, 72, 255, 0.55));
+}
+
+@keyframes drift-mist {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-2%, 1%, 0) scale(1.03);
+  }
+}
+
+@keyframes shimmer-grain {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-1.5%, 1.5%, 0);
+  }
+}
+
+@keyframes orbit-slow {
+  0% {
+    transform: rotate(18deg) scale(0.98);
+  }
+  100% {
+    transform: rotate(378deg) scale(0.98);
+  }
+}
+
+@keyframes orbit-slower {
+  0% {
+    transform: rotate(-12deg) scale(1.01);
+  }
+  100% {
+    transform: rotate(-372deg) scale(1.01);
+  }
 }
 
 .controls {
@@ -104,6 +203,14 @@ body {
   padding: 1rem 1.2rem;
   background: rgba(8, 8, 16, 0.42);
   backdrop-filter: blur(2px);
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+  transition: opacity 0.4s ease, transform 0.45s ease;
+}
+
+.prediction-card.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .prediction-title {
@@ -127,6 +234,10 @@ body {
   flex-wrap: wrap;
   gap: 0.6rem;
   align-items: center;
+}
+
+.share-controls[hidden] {
+  display: none;
 }
 
 .secondary-btn {
