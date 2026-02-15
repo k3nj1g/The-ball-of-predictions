@@ -8,12 +8,6 @@ const predictBtn = document.getElementById('predict-btn');
 const errorText = document.getElementById('error-text');
 const predictionCard = document.getElementById('prediction-card');
 const predictionText = document.getElementById('prediction-text');
-const shareControls = document.getElementById('share-controls');
-const shareBtn = document.getElementById('share-btn');
-const copyBtn = document.getElementById('copy-btn');
-const tgLink = document.getElementById('tg-link');
-const vkLink = document.getElementById('vk-link');
-const xLink = document.getElementById('x-link');
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -81,11 +75,12 @@ function drawOrb(timeSec) {
   orbGradient.addColorStop(1, 'rgba(11, 5, 26, 1)');
 
   ctx.save();
+  const currentRadius = radius + pulse;
   ctx.beginPath();
-  ctx.arc(center, center, radius + pulse, 0, Math.PI * 2);
+  ctx.arc(center, center, currentRadius, 0, Math.PI * 2);
   ctx.clip();
   ctx.fillStyle = orbGradient;
-  ctx.fillRect(center - radius, center - radius, radius * 2, radius * 2);
+  ctx.fillRect(center - currentRadius, center - currentRadius, currentRadius * 2, currentRadius * 2);
 
   ctx.globalCompositeOperation = 'screen';
 
@@ -199,28 +194,6 @@ function setStatus(nextStatus) {
   }
 }
 
-function buildSharePayload() {
-  if (!state.prediction) return null;
-
-  const url = window.location.href;
-  const text = `${state.prediction.text} — Мой мистический прогноз.`;
-  return {
-    title: 'Мистический шар',
-    text,
-    url,
-    encodedText: encodeURIComponent(`${text.slice(0, 220)} ${url}`)
-  };
-}
-
-function updateShareLinks() {
-  const payload = buildSharePayload();
-  if (!payload) return;
-
-  tgLink.href = `https://t.me/share/url?url=${encodeURIComponent(payload.url)}&text=${encodeURIComponent(payload.text.slice(0, 180))}`;
-  vkLink.href = `https://vk.com/share.php?url=${encodeURIComponent(payload.url)}&comment=${encodeURIComponent(payload.text.slice(0, 180))}`;
-  xLink.href = `https://twitter.com/intent/tweet?text=${payload.encodedText}`;
-}
-
 async function runPrediction() {
   const cleanName = sanitizeName(nameInput.value);
   nameInput.value = cleanName;
@@ -228,7 +201,6 @@ async function runPrediction() {
   if (!cleanName) {
     setError('Введи имя, чтобы шар увидел нить судьбы.');
     predictionCard.hidden = true;
-    shareControls.hidden = true;
     return;
   }
 
@@ -242,53 +214,12 @@ async function runPrediction() {
   state.prediction = generatePrediction(cleanName, true);
   predictionText.textContent = state.prediction.text;
   predictionCard.hidden = false;
-  shareControls.hidden = false;
   setStatus('result');
-  updateShareLinks();
 }
 
 predictBtn.addEventListener('click', runPrediction);
 nameInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') runPrediction();
-});
-
-shareBtn.addEventListener('click', async () => {
-  const payload = buildSharePayload();
-  if (!payload) return;
-
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: payload.title, text: payload.text, url: payload.url });
-      return;
-    } catch {
-      // Ignore and fallback to copy below
-    }
-  }
-
-  try {
-    await navigator.clipboard.writeText(`${payload.text}\n${payload.url}`);
-    copyBtn.textContent = 'Скопировано!';
-    setTimeout(() => {
-      copyBtn.textContent = 'Скопировать';
-    }, 1400);
-  } catch {
-    setError('Не удалось поделиться. Скопируй текст вручную.');
-  }
-});
-
-copyBtn.addEventListener('click', async () => {
-  const payload = buildSharePayload();
-  if (!payload) return;
-
-  try {
-    await navigator.clipboard.writeText(`${payload.text}\n${payload.url}`);
-    copyBtn.textContent = 'Скопировано!';
-    setTimeout(() => {
-      copyBtn.textContent = 'Скопировать';
-    }, 1400);
-  } catch {
-    setError('Буфер обмена недоступен.');
-  }
 });
 
 window.addEventListener('resize', resizeCanvas);
