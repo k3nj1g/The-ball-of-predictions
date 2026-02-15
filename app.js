@@ -28,7 +28,7 @@ const state = {
 
 const modeSettings = {
   idle: { pulse: 0.1, glow: 0.7, speed: 0.45, lightningChance: 0.05 },
-  thinking: { pulse: 0.4, glow: 1.15, speed: 1.25, lightningChance: 0.18 },
+  thinking: { pulse: 0.55, glow: 1.28, speed: 1.7, lightningChance: 0.3 },
   result: { pulse: 0.18, glow: 0.85, speed: 0.62, lightningChance: 0.08 }
 };
 
@@ -47,15 +47,19 @@ function randomBetween(min, max) {
 function drawOrb(timeSec) {
   const size = Math.min(canvas.clientWidth, canvas.clientHeight);
   const center = size / 2;
-  const radius = size * 0.39;
+  const radius = size * 0.33;
   const mode = modeSettings[state.status];
   const pulse = prefersReducedMotion ? 0 : Math.sin(timeSec * (2 + mode.speed)) * radius * mode.pulse * 0.08;
+  const thinkingIntensity = state.status === 'thinking' ? 1 : 0;
+  const arcFlicker = prefersReducedMotion
+    ? 0
+    : (Math.sin(timeSec * 24) * 0.5 + Math.sin(timeSec * 41) * 0.35 + Math.random() * 0.25) * thinkingIntensity;
 
   ctx.clearRect(0, 0, size, size);
 
   const glowGradient = ctx.createRadialGradient(center, center, radius * 0.2, center, center, radius * 1.3);
-  glowGradient.addColorStop(0, `rgba(206, 168, 255, ${0.45 * mode.glow})`);
-  glowGradient.addColorStop(0.55, `rgba(102, 51, 182, ${0.36 * mode.glow})`);
+  glowGradient.addColorStop(0, `rgba(206, 168, 255, ${(0.45 + arcFlicker * 0.18) * mode.glow})`);
+  glowGradient.addColorStop(0.55, `rgba(102, 51, 182, ${(0.36 + arcFlicker * 0.08) * mode.glow})`);
   glowGradient.addColorStop(1, 'rgba(17, 7, 34, 0)');
 
   ctx.fillStyle = glowGradient;
@@ -71,8 +75,8 @@ function drawOrb(timeSec) {
     center,
     radius + pulse
   );
-  orbGradient.addColorStop(0, `rgba(247, 230, 255, ${0.9 * mode.glow})`);
-  orbGradient.addColorStop(0.3, `rgba(174, 120, 255, ${0.75 * mode.glow})`);
+  orbGradient.addColorStop(0, `rgba(247, 230, 255, ${(0.9 + arcFlicker * 0.12) * mode.glow})`);
+  orbGradient.addColorStop(0.3, `rgba(174, 120, 255, ${(0.75 + arcFlicker * 0.18) * mode.glow})`);
   orbGradient.addColorStop(0.7, `rgba(58, 23, 120, ${0.85 * mode.glow})`);
   orbGradient.addColorStop(1, 'rgba(11, 5, 26, 1)');
 
@@ -97,8 +101,24 @@ function drawOrb(timeSec) {
     ctx.fill();
   }
 
+  if (state.status === 'thinking' && !prefersReducedMotion) {
+    const arcs = 5;
+    for (let i = 0; i < arcs; i += 1) {
+      const start = timeSec * mode.speed + i * 0.9;
+      const sweep = 0.45 + Math.sin(timeSec * 5 + i) * 0.18;
+      ctx.beginPath();
+      ctx.arc(center, center, radius * (0.45 + i * 0.11), start, start + sweep);
+      ctx.strokeStyle = `rgba(223, 189, 255, ${0.18 + Math.abs(arcFlicker) * 0.22})`;
+      ctx.lineWidth = 1.4;
+      ctx.shadowBlur = 16;
+      ctx.shadowColor = 'rgba(187, 156, 255, 0.9)';
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+  }
+
   if (Math.random() < mode.lightningChance && !prefersReducedMotion) {
-    const bolts = state.status === 'thinking' ? 6 : 3;
+    const bolts = state.status === 'thinking' ? 10 : 3;
     for (let i = 0; i < bolts; i += 1) {
       drawLightning(center, center, radius);
     }
